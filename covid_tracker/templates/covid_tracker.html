@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block css %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<style>
+    body {
+        margin:0px;
+        padding:0px;
+        font-family: var(--mdc-typography-body2-font-family, var(--mdc-typography-font-family, Roboto, sans-serif));
+    }
+    .top_bar {
+        background:rgb(230,230,230);
+        margin : 0px;
+        display:flex;
+        align-items: center;
+        padding: 5px;
+    }
+
+    ::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 1px grey; 
+  border-radius: 10px;
+
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #777; 
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #000; 
+}
+
+    .nav_bar_icon{
+        height: 50px;
+        width: auto;
+    }
+
+    .nav_title{
+        font-weight: bold;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        padding-right: 10vw;
+        border-right: 1px solid #aaa;
+    }
+    .nav-menu-item {
+        padding: 0px 20px;
+        color:#888;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .nav-menu {
+        display: inline;
+        color:#888;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .nav-item-active {
+        color: #000;
+        font-weight: bold;
+    }
+
+    .nav-item-container {
+        list-style: none;
+        width: 80vw;
+    }
+
+    .text-center{
+        text-align: center;
+    }
+
+    .mdc-data-table__header-cell {
+        font-weight: bold ;
+    }
+</style>
+{% endblock css %}
+
+
+
+{% block content %}
+    <div class="top_bar">
+        <div style="display: flex;align-items: center;width: 21vw;">
+            <img src="{% static 'images/covid_icon.png' %}" alt="covid icon" class="nav_bar_icon">
+
+            <div style="display: flex;align-items: center;" class="nav_title">{{country}} Tracker</div> 
+        </div>
+        <ul class="nav-item-container">
+            <li class="nav-menu  "><a class="nav-menu-item nav-item-active" href="/">Home</a></li>
+            <li class="nav-menu"><a class="nav-menu-item" href="#">Menu2</a></li>
+            <li class="nav-menu"><a class="nav-menu-item" href="#">Menu3</a></li> 
+            <li class="nav-menu"><a class="nav-menu-item" href="#">Menu4</a></li>
+            <li class="nav-menu"><a class="nav-menu-item" href="#">Menu5</a></li>
+        </ul> 
+
+    </div>
+   
+
+
+    <div class="" style="display: flex;">
+        <div class="">
+            <div class="mdc-data-table">
+                <div class="mdc-data-table__table-container" style="max-height:90vh">
+                    <table class="mdc-data-table__table" aria-label="Dessert calories"  style="width:20vw;">
+                    <thead>
+                        <tr class="mdc-data-table__header-row">
+                        <th class="mdc-data-table__header-cell" role="columnheader" scope="col" style="position:sticky;top:0;font-weight:bold;">States</th>
+                        
+                        </tr>
+                    </thead>
+                    <tbody class="mdc-data-table__content">
+                        {% for state in data %}
+                        <tr class="mdc-data-table__row">
+                            
+                                <td 
+                                    class="mdc-data-table__cell mdc-data-table__cell" 
+                                    style="cursor:pointer;" 
+                                    onclick="loadData('{{state}}')"> 
+                                    {% if state|length > 0 %}
+                                        {{state}}
+                                    {% else %}
+                                        <b>All States</b>
+                                    {% endif %}
+
+                                </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div id="workspace" style="padding: 20px;width: 80vw;" class="text-center">
+            
+            <br><br>
+            <img src="{% static 'images/select.svg' %}" alt="covid icon" class="" style="width: auto; height: 40vh;margin-top: 10vh;">
+            <h3 > Select a state to view the report</h3>
+            
+        </div>
+    </div>   
+    
+
+    
+{% endblock content %}
+{% block js %}
+<script>
+    let data = "{{data}}".replaceAll("&#x27","").replaceAll("{;","{\"").replaceAll(";:","\":").replaceAll(", ;",",\"");
+    data = JSON.parse(data);
+    
+    let menus = document.getElementsByClassName("nav-menu-item");
+    for(let menu of menus) {
+        menu.addEventListener('click',function(){
+            
+            let t_menus = document.getElementsByClassName("nav-menu-item");
+            for(let t_menu of t_menus) {
+                t_menu.className = t_menu.className.replace(/\bnav-item-active\b/g, "");
+            }
+
+            this.className = this.className + " nav-item-active"
+        }) 
+    }
+
+    function loadData(state) { 
+
+        let html = `  
+            <h2 style="border-bottom:1px solid #eee;padding:30px;">${state?state:'Total'}</h2>
+            
+            <div style="display:flex;width:100%;border-bottom:1px solid #eee;">
+                <div id="charts" style="width:50%;border-right:1px solid #eee"></div>
+                <div class="" style="width:50%;">
+                    ${getTable(data[state])}
+                </div>
+            </div>
+    
+            <p style="margin-top:15vh;font-size:0.8rem;">Representing data for ${state?state + ' state':'all states'} </p>
+        `;
+
+        document.getElementById('workspace').innerHTML = html;
+
+
+        const {Active,Cured,Death} = data[state];
+        var options = {
+            series: [Active, Cured, Death],
+            chart: {
+            width: 380,
+            type: 'pie',
+            },
+            labels: ['Active', 'Cured', 'Death'],
+            responsive: [{
+            breakpoint: 480,
+            options: {
+                chart: {
+                width: 200
+                },
+                legend: {
+                position: 'bottom'
+                }
+            }
+            }]
+            };
+            document.querySelector("#charts").innerHTML = ""
+        var chart = new ApexCharts(document.querySelector("#charts"), options);
+        chart.render();
+    }
+
+    function getTable(data) {
+        return `  
+            <div class="mdc-data-table" style="width:100%;border:none">
+                    <h4>Covid Stats</h4>
+                    <div class="mdc-data-table__table-container" style="max-height:90vh">
+                        <table class="mdc-data-table__table" aria-label="Dessert calories">
+                        <thead>
+                            <tr class="mdc-data-table__header-row">
+                                
+                            
+                            </tr>
+                        </thead>
+                        <tbody class="mdc-data-table__content">
+                            
+                            <tr class="mdc-data-table__row">
+                                <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Active</th>
+                                <td class="mdc-data-table__cell mdc-data-table__cell"> ${data.Active}</td>
+                            </tr>
+                            
+                            <tr class="mdc-data-table__row">
+                                <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Cured</th>
+                                <td class="mdc-data-table__cell mdc-data-table__cell"> ${data.Cured}</td>
+                            </tr>
+                            <tr class="mdc-data-table__row">
+                                <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Death</th>
+                                <td class="mdc-data-table__cell mdc-data-table__cell"> ${data.Death}</td>
+                            </tr>
+                            <tr class="mdc-data-table__row">
+                                <th class="mdc-data-table__header-cell" role="columnheader" scope="col">Total</th>
+                                <td class="mdc-data-table__cell mdc-data-table__cell"> ${data.Active + data.Cured + data.Death}</td>
+                            </tr>
+                        </tbody>
+                        </table>
+                    </div>
+                </div>
+        `;
+    }
+</script>
+{% endblock js %}
+
+

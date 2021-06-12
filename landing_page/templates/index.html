@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block css %}
+<style>
+  
+    body {
+        background-image: url('{% static "images/landing-page-background.png" %}');
+        background-size: cover;
+        font-family: 'Roboto Slab', serif;
+    }
+
+    .box {
+        display: flex;
+        width: 60vw;
+        height: 70vh;
+        justify-content : center;
+        align-items: center;
+        margin-top: 15vh;
+        
+    }
+
+    .text-center {
+        text-align: center;
+    }
+</style>
+
+{% endblock css %}
+
+
+{% block content %}
+    <div class="box">
+        <div class="text-center">
+            <h1 style="font-size: 4rem;">{{title}}</h1>
+            
+            <h2>{{country}}</h2>
+
+            <a class="mdc-button mdc-button--raised" href="{% url 'covid_tracker' %}">
+                <span class="mdc-button__label">Click Here to Open Tracker</span>
+                <span class="material-icons material-icons-outlined" style="margin-left: 10px;">
+                    keyboard_tab
+                    </span>
+                </a>
+        </div>
+    </div>
+{% endblock content %}
+
+
+
+
+    

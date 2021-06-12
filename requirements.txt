@@ -1,0 +1,1 @@
+covid-india==1.1.4
